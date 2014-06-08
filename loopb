@@ -1,0 +1,20 @@
+#!/bin/sh
+#This will repeat # times a command in background
+#Example: loopb 80 echo "-\c"; will print a line of 80 "-"
+#
+USAGE="Usage: loopb # comm";
+if test $# -lt 2; then
+	echo $USAGE;
+	exit 1;
+fi
+if expr $1>/dev/null; then
+	CNT=$1;
+else
+	echo $USAGE;
+	exit 1;
+fi;
+shift;
+while CNT=`expr $CNT - 1`; expr $CNT \>= 0 >/dev/null;
+do $*&
+done;
+wait

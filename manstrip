@@ -1,0 +1,9 @@
+# this will strip bold and underline from man output;
+# example: man ksh|manstrip >ksh_man;
+# warning: this scripts contains backspace characters, use cat -v;
+#
+col -b
+#sed \
+#"s/_//g
+#s/.//g" \
+#$*;

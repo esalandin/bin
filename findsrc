@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ "$#" = 0 ]; then
+	DIR=".";
+else
+	DIR=$1
+	shift
+fi
+find $DIR -name \*.proto -o -name \*.sql -o -name \*.pls -o -name \*.plb -o -name Imakefile -o -name \*.java -o -name \*.csh -o -name \*.sh -o -name \*.sql -o -name \*.cc -o -name \*.c -o -name \*.cpp -o -name \*.icc -o -name \*.h -o -name \*.pc -o -name \*.i -o -name \*.xml -o -name \*.groovy $* |grep -v doxygen
