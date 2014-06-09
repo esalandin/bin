@@ -1,4 +1,4 @@
-#! /bin/ksh
+#!/bin/sh
 # view stdin if not empty
 # set -x #uncomment for debug
 TMPFIL=/tmp/vin_$$.tmp
