@@ -1,6 +1,16 @@
+#!/bin/false
+# cannot be executed, can be sourced (or you can copy the function)
 # function to add to path if not already there
+
 pathadd() {
-    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+    if [ ! -d "$1" ] ; then
+        echo "$1 not a directory" >&2
+    elif [[ ":$PATH:" == *":$1:"* ]]; then
+        echo "$1 already in path" >&2
+    else
         PATH="${PATH:+"$PATH:"}$1"
     fi
 }
+
+pathadd $1
+echo PATH=$PATH >&2
