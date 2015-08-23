@@ -1,5 +1,7 @@
 #!/bin/sh
-##########
+set -x
+set -f # noglob, disable wildcard
+
 addpattern() {
 	if [ -z "$FINDPATTERN" ]; then
 		FINDPATTERN="-name $1";
@@ -15,23 +17,23 @@ else
 	shift
 fi
 
-addpattern \*.c;
-addpattern \*.cc;
-addpattern \*.h;
-addpattern \*.cpp;
-addpattern \*.proto;
-addpattern \*.sql;
-addpattern \*.pls;
-addpattern \*.plb;
+addpattern *.c;
+addpattern *.cc;
+addpattern *.h;
+addpattern *.cpp;
+addpattern *.proto;
+addpattern *.sql;
+addpattern *.pls;
+addpattern *.plb;
 addpattern Imakefile;
-addpattern \*.java;
-addpattern \*.csh;
-addpattern \*.sh;
-addpattern \*.sql;
-addpattern \*.icc;
-addpattern \*.i;
-addpattern \*.pc;
-addpattern \*.xml;
-addpattern \*.groovy
+addpattern *.java;
+addpattern *.csh;
+addpattern *.sh;
+addpattern *.sql;
+addpattern *.icc;
+addpattern *.i;
+addpattern *.pc;
+addpattern *.xml;
+addpattern *.groovy
 
 find $DIR $FINDPATTERN $* |sed 's/ /\\ /g'
