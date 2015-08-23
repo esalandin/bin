@@ -1,8 +1,37 @@
 #!/bin/sh
+##########
+addpattern() {
+	if [ -z "$FINDPATTERN" ]; then
+		FINDPATTERN="-name $1";
+	else
+		FINDPATTERN="$FINDPATTERN -o -name $1"
+	fi
+}
+##########
 if [ "$#" = 0 ]; then
 	DIR=".";
 else
 	DIR=$1
 	shift
 fi
-find $DIR -name \*.proto -o -name \*.sql -o -name \*.pls -o -name \*.plb -o -name Imakefile -o -name \*.java -o -name \*.csh -o -name \*.sh -o -name \*.sql -o -name \*.cc -o -name \*.c -o -name \*.cpp -o -name \*.icc -o -name \*.h -o -name \*.pc -o -name \*.i -o -name \*.xml -o -name \*.groovy $* |sed 's/ /\\ /g'
+
+addpattern \*.c;
+addpattern \*.cc;
+addpattern \*.h;
+addpattern \*.cpp;
+addpattern \*.proto;
+addpattern \*.sql;
+addpattern \*.pls;
+addpattern \*.plb;
+addpattern Imakefile;
+addpattern \*.java;
+addpattern \*.csh;
+addpattern \*.sh;
+addpattern \*.sql;
+addpattern \*.icc;
+addpattern \*.i;
+addpattern \*.pc;
+addpattern \*.xml;
+addpattern \*.groovy
+
+find $DIR $FINDPATTERN $* |sed 's/ /\\ /g'
