@@ -1,0 +1,4 @@
+#!/bin/sh
+PATTERN=$1; shift
+REPL=$1; shift
+sed -e "s/$PATTERN/$REPL/g" $*
