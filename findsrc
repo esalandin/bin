@@ -35,4 +35,4 @@ addpattern *.pc;
 addpattern *.xml;
 addpattern *.groovy
 
-find $DIR $FINDPATTERN $* |sed 's/ /\\ /g'
+find $DIR $FINDPATTERN $* |grep -v /\\.git/ |sed 's/ /\\ /g'
