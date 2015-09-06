@@ -36,4 +36,4 @@ addpattern *.xml;
 addpattern *.groovy
 addpattern *.js
 
-find $DIR $FINDPATTERN $* |grep -v /\\.git/ |sed 's/ /\\ /g'
+find $DIR -follow -type f -a \( $FINDPATTERN \)  $* |grep -v /\\.git/ |sed 's/ /\\ /g'
