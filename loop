@@ -1,19 +1,45 @@
 #!/bin/sh
 #This will repeat # times a command
-#Example: loop 80 echo "-\c"; will print a line of 80 "-"
+#Examples:
+# loop 2 date; will print a date twice
+# loop 80 echo "-\c"; will print a line of 80 "-"
 #
-USAGE="Usage: loop # comm";
+USAGE="Usage: loop [-h] | [-b] number command"
+
+while getopts bh OPTCHAR
+do
+	case $OPTCHAR in
+	h) echo $USAGE >&2;
+	   echo "repeats a command a number of times." >&2
+	   echo "Otions:" >&2
+	   echo "-b: background" >&2
+	   echo "-h: print usage and exit" >&2
+	   exit 1;;
+	b) BACKGROUND="yes";;
+	?) echo $USAGE >&2;
+	   exit 1;;
+	esac
+done
+shift $(($OPTIND - 1))
 if test $# -lt 2; then
-	echo $USAGE;
+	echo $USAGE >&2;
 	exit 1;
 fi
 if expr $1>/dev/null; then
 	CNT=$1;
 else
-	echo $USAGE;
+	echo $USAGE >&2;
 	exit 1;
 fi;
 shift;
-while CNT=`expr $CNT - 1`; expr $CNT \>= 0 >/dev/null;
-do $*
-done;
+
+if [ $BACKGROUND ]; then
+	while CNT=$(( $CNT - 1 )); expr $CNT \>= 0 >/dev/null;
+		do $* &
+	done;
+	wait;
+else
+	while CNT=$(( $CNT - 1 )); expr $CNT \>= 0 >/dev/null;
+		do $*
+	done;
+fi
