@@ -1,6 +1,6 @@
 #!/bin/sh
-#This will repeat # times a command
-#Examples:
+# This will repeat # times a command
+# Examples:
 # loop 2 date; will print a date twice
 # loop 80 echo "-\c"; will print a line of 80 "-"
 #
@@ -12,9 +12,9 @@ do
 	h) echo $USAGE >&2;
 	   echo "repeats a command a number of times." >&2
 	   echo "Otions:" >&2
-	   echo "-b: background" >&2
+	   echo "-b  : background" >&2
 	   echo "-p N: sleep N seconds after each loop" >&2
-	   echo "-h: print usage and exit" >&2
+	   echo "-h  : print usage and exit" >&2
 	   exit 1;;
 	b) BACKGROUND="yes";;
 	p) SLEEP_SEC="$OPTARG";;
@@ -35,16 +35,18 @@ else
 fi;
 shift;
 
+CMD="$*"
+if [ "$SLEEP_SEC" ]; then
+	CMD="$CMD ; sleep $SLEEP_SEC;"
+fi
+
 if [ $BACKGROUND ]; then
-	while CNT=$(( $CNT - 1 )); expr $CNT \>= 0 >/dev/null; do (
-		$*;
-		if [ "$SLEEP_SEC" ]; then sleep $SLEEP_SEC; fi
-	) &
+	while CNT=$(( $CNT - 1 )); expr $CNT \>= 0 >/dev/null; do
+		eval $CMD &
 	done;
 	wait;
 else
 	while CNT=$(( $CNT - 1 )); expr $CNT \>= 0 >/dev/null; do
-		$*;
-		if [ "$SLEEP_SEC" ]; then sleep $SLEEP_SEC; fi
+		eval $CMD ;
 	done;
 fi
