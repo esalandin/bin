@@ -5,6 +5,8 @@
 # loop 80 echo "-\c"; will print a line of 80 "-"
 #
 USAGE="Usage: loop [-h] | [-b] [-p N] number command"
+SLEEP_SEC="";
+BACKGROUND="";
 
 while getopts bp:h OPTCHAR
 do
@@ -40,7 +42,7 @@ if [ "$SLEEP_SEC" ]; then
 	CMD="$CMD ; sleep $SLEEP_SEC;"
 fi
 
-if [ $BACKGROUND ]; then
+if [ "$BACKGROUND" ]; then
 	while CNT=$(( $CNT - 1 )); expr $CNT \>= 0 >/dev/null; do
 		eval $CMD &
 	done;
