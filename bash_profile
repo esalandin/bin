@@ -1,2 +1,2 @@
 PATH=$PATH:$HOME/bin
-PS1="\h:\W \$ "
+PS1="[\u@\h \W]\$ "
