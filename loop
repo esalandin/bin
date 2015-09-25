@@ -43,12 +43,12 @@ if [ "$SLEEP_SEC" ]; then
 fi
 
 if [ "$BACKGROUND" ]; then
-        for ((; CNT>=0; CNT=$CNT-1 )); do
+        for ((; CNT>0; CNT=$CNT-1 )); do
 		eval $CMD &
 	done;
 	wait;
 else
-        for ((; CNT>=0; CNT=$CNT-1 )); do
+        for ((; CNT>0; CNT=$CNT-1 )); do
 		eval $CMD ;
 	done;
 fi
