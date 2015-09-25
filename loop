@@ -29,9 +29,9 @@ if test $# -lt 2; then
 	echo $USAGE >&2;
 	exit 1;
 fi
-if expr $1>/dev/null; then
-	CNT=$1;
-else
+declare -i CNT
+CNT=$1
+if [ "$CNT" -le 0 ]; then
 	echo $USAGE >&2;
 	exit 1;
 fi;
@@ -43,12 +43,12 @@ if [ "$SLEEP_SEC" ]; then
 fi
 
 if [ "$BACKGROUND" ]; then
-	while CNT=$(( $CNT - 1 )); expr $CNT \>= 0 >/dev/null; do
+	while CNT=$CNT-1; [ $CNT -ge 0 ]; do
 		eval $CMD &
 	done;
 	wait;
 else
-	while CNT=$(( $CNT - 1 )); expr $CNT \>= 0 >/dev/null; do
+	while CNT=$CNT-1; [ $CNT -ge 0 ]; do
 		eval $CMD ;
 	done;
 fi
