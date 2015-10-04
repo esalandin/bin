@@ -1,0 +1,17 @@
+##########
+# set env for ia builds
+##########
+pathadd() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+}
+##########
+WORKSPACE=$HOME/workspace
+##########
+export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+echo "JAVA_HOME=$JAVA_HOME"
+
+pathadd $WORKSPACE/apache-maven-3.3.3/bin
+echo "PATH=$PATH"
+##########
