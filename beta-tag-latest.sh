@@ -37,4 +37,5 @@ echo IMAGES_LIST $IMAGES_LIST
 
 for IMAGE in $IMAGES_LIST; do
 	echo docker tag $DREG/${IMAGE}:$BTAG $DREG/$IMAGE:latest
+	curl http://$DREG/v2/$IMAGE/tags/list
 done
