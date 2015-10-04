@@ -9,7 +9,12 @@ pathadd() {
 ##########
 WORKSPACE=$HOME/workspace
 ##########
-export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+case `uname -s` in
+	Linux) JAVA_HOME="";;
+	Darwin) JAVA_HOME=`/usr/libexec/java_home -v 1.8`;;
+	*)      echo "unknown uname -s" >&2;;
+esac
+export JAVA_HOME
 echo "JAVA_HOME=$JAVA_HOME"
 
 pathadd $WORKSPACE/apache-maven-3.3.3/bin
