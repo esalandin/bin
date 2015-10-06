@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 if [ $# -lt 1 ]; then
     echo "Usage: beta-tag-latest.sh 1.0.0-beta.12" >&2
@@ -33,9 +32,10 @@ IMAGES_LIST+=" sensu-server"
 IMAGES_LIST+=" sensu-uchiwa"
 IMAGES_LIST+=" ui-dbm-query"
 IMAGES_LIST+=" ui-discovery"
-echo IMAGES_LIST $IMAGES_LIST
 
 for IMAGE in $IMAGES_LIST; do
-	echo docker tag $DREG/${IMAGE}:$BTAG $DREG/$IMAGE:latest
-	curl http://$DREG/v2/$IMAGE/tags/list
+	( set -x; docker pull $DREG/${IMAGE}:$BTAG )
+	( set -x; docker tag -f $DREG/${IMAGE}:$BTAG $DREG/$IMAGE:latest )
+	( set -x; docker push $DREG/$IMAGE:latest )
+#	curl http://$DREG/v2/$IMAGE/tags/list
 done
