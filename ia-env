@@ -7,7 +7,7 @@ pathadd() {
     fi
 }
 ##########
-WORKSPACE=$HOME/workspace
+WORKSPACE=$HOME/work*
 ##########
 case `uname -s` in
 	Linux) JAVA_HOME="";;
