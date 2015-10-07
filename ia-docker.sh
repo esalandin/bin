@@ -1,7 +1,30 @@
 #!/bin/bash
 
-if [ $# -lt 1 ]; then
-    echo "Usage: beta-tag-latest.sh 1.0.0-beta.12" >&2
+USAGE="Usage: ia-docker.sh [-r | -t | -l] tag"
+
+while getopts trlh OPTCHAR
+do
+        case $OPTCHAR in
+        h) echo $USAGE >&2;
+           echo "operations on all IA images" >&2
+           echo "Otions:" >&2
+           echo "-t : tag as latest" >&2
+           echo "-r : remove" >&2
+           echo "-l : list" >&2
+           echo "-h : print usage and exit" >&2
+           echo "example: ia-docker.sh -t 1.0.0-beta.15" >&2
+           exit 1;;
+        r) COMMAND="remove";;
+        t) COMMAND="tag-latest";;
+        l) COMMAND="list";;
+        ?) echo $USAGE >&2;
+           exit 1;;
+        esac
+done
+shift $(($OPTIND - 1))
+
+if [ $# -ne 1 ]; then
+    echo $USAGE >&2
     exit 1
 fi
 BTAG=$1; shift
@@ -35,8 +58,19 @@ IMAGES_LIST+=" ui-dbm-query"
 IMAGES_LIST+=" ui-discovery"
 
 for IMAGE in $IMAGES_LIST; do
+    case "$COMMAND" in
+    tag-latest)
 	( set -x; docker pull $DREG/${IMAGE}:$BTAG )
 	( set -x; docker tag -f $DREG/${IMAGE}:$BTAG $DREG/$IMAGE:latest )
 	( set -x; docker push $DREG/$IMAGE:latest )
+        ;;
+    remove)
+	( set -x; docker rmi -f $DREG/${IMAGE}:$BTAG )
+        ;;
+    list)
+	echo $DREG/${IMAGE}:$BTAG
+        ;;
+    *)  echo error >&2;;
+    esac
 #	curl http://$DREG/v2/$IMAGE/tags/list
 done
