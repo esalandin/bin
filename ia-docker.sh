@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USAGE="Usage: ia-docker.sh [-r | -t | -l] tag"
+USAGE="Usage: ia-docker.sh [-p | -r | -t | -l] tag"
 
 while getopts trlh OPTCHAR
 do
@@ -8,12 +8,14 @@ do
         h) echo $USAGE >&2;
            echo "operations on all IA images" >&2
            echo "Otions:" >&2
+           echo "-p : pull" >&2
            echo "-t : tag as latest" >&2
            echo "-r : remove" >&2
            echo "-l : list" >&2
            echo "-h : print usage and exit" >&2
            echo "example: ia-docker.sh -t 1.0.0-beta.15" >&2
            exit 1;;
+        p) COMMAND="pull";;
         r) COMMAND="remove";;
         t) COMMAND="tag-latest";;
         l) COMMAND="list";;
@@ -63,6 +65,9 @@ for IMAGE in $IMAGES_LIST; do
 	( set -x; docker pull $DREG/${IMAGE}:$BTAG )
 	( set -x; docker tag -f $DREG/${IMAGE}:$BTAG $DREG/$IMAGE:latest )
 	( set -x; docker push $DREG/$IMAGE:latest )
+        ;;
+    pull)
+	( set -x; docker pull -f $DREG/${IMAGE}:$BTAG )
         ;;
     remove)
 	( set -x; docker rmi -f $DREG/${IMAGE}:$BTAG )
