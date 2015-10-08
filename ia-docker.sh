@@ -67,7 +67,7 @@ for IMAGE in $IMAGES_LIST; do
 	( set -x; docker push $DREG/$IMAGE:latest )
         ;;
     pull)
-	( set -x; docker pull -f $DREG/${IMAGE}:$BTAG )
+	( set -x; docker pull $DREG/${IMAGE}:$BTAG )
         ;;
     remove)
 	( set -x; docker rmi -f $DREG/${IMAGE}:$BTAG )
