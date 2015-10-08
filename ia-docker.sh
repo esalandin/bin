@@ -2,6 +2,7 @@
 
 USAGE="Usage: ia-docker.sh [-p | -r | -t | -l] tag"
 
+COMMAND=""
 while getopts ptrlh OPTCHAR
 do
         case $OPTCHAR in
@@ -13,7 +14,7 @@ do
            echo "-r : remove" >&2
            echo "-l : list" >&2
            echo "-h : print usage and exit" >&2
-           echo "example: ia-docker.sh -t 1.0.0-beta.15" >&2
+           echo "example: ia-docker.sh -p 1.0.0-beta.15" >&2
            exit 1;;
         p) COMMAND="pull";;
         r) COMMAND="remove";;
@@ -25,7 +26,7 @@ do
 done
 shift $(($OPTIND - 1))
 
-if [ $# -ne 1 ]; then
+if [ $# -ne 1 -o -z "$COMMAND" ]; then
     echo $USAGE >&2
     exit 1
 fi
@@ -75,7 +76,7 @@ for IMAGE in $IMAGES_LIST; do
     list)
 	echo $DREG/${IMAGE}:$BTAG
         ;;
-    *)  echo error >&2;;
+    *)  echo error COMMAND=$COMMAND >&2;;
     esac
 #	curl http://$DREG/v2/$IMAGE/tags/list
 done
