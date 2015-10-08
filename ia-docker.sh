@@ -2,7 +2,7 @@
 
 USAGE="Usage: ia-docker.sh [-p | -r | -t | -l] tag"
 
-while getopts trlh OPTCHAR
+while getopts ptrlh OPTCHAR
 do
         case $OPTCHAR in
         h) echo $USAGE >&2;
