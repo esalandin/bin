@@ -13,7 +13,7 @@ do
 	case $OPTCHAR in
 	h) echo $USAGE >&2;
 	   echo "repeats a command a number of times." >&2
-	   echo "Otions:" >&2
+	   echo "Options:" >&2
 	   echo "-b  : background" >&2
 	   echo "-p N: sleep N seconds after each loop" >&2
 	   echo "-h  : print usage and exit" >&2
