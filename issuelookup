@@ -5,8 +5,13 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 ISSUE_LIST=$*
+JIRA_URL=http://tekcomms-jira.global.tektronix.net:8085
+HEADER="Content-Type: application/json"
 
 for ISSUE in $ISSUE_LIST; do
-    SUMMARY=$(curl -s -u jirareadonly:jirareadonly -X GET -H "Content-Type: application/json" "http://tekcomms-jira.global.tektronix.net:8085/rest/api/2/issue/$ISSUE?fields=summary"|python -c "import json, sys; print json.load(sys.stdin)['fields']['summary']")
+    SUMMARY=$(
+        curl -s -u jirareadonly:jirareadonly -X GET -H $HEADER "$JIRA_URL/rest/api/2/issue/$ISSUE?fields=summary" |
+        python -c "import json, sys; print json.load(sys.stdin)['fields']['summary']"
+    )
     echo $ISSUE: $SUMMARY;
 done
