@@ -11,8 +11,10 @@ HEADER="Content-Type: application/json"
 TMPF=/tmp/issuelookup.$$
 for ISSUE_ID in $ISSUE_LIST; do
     curl -s $JIRA_AUTH -X GET -H $HEADER $JIRA_URL/rest/api/2/issue/$ISSUE_ID > $TMPF
-    SUMMARY=`python -c "import json, sys; print json.load(sys.stdin)['fields']['summary']" < $TMPF`
-    STATUS=`python -c "import json, sys; print json.load(sys.stdin)['fields']['status']['name']" < $TMPF`
-    echo "$ISSUE_ID: $SUMMARY"
-    echo "STATUS= $STATUS"
+    python -c "
+import json, sys;
+json_issue= json.load(sys.stdin);
+print '%s: %s' % (json_issue['key'], json_issue['fields']['summary']);
+print 'Status= %s' % json_issue['fields']['status']['name'];
+" < $TMPF
 done
