@@ -18,3 +18,4 @@ print '%s: %s' % (json_issue['key'], json_issue['fields']['summary']);
 print 'Status= %s' % json_issue['fields']['status']['name'];
 " < $TMPF
 done
+rm $TMPF

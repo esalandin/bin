@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USAGE="Usage: ia-docker.sh [-p | -r | -t | -l] tag"
+USAGE="Usage: ia-docker.sh [-p | -r | -t | -l | -h] tag"
 
 COMMAND=""
 while getopts ptrlh OPTCHAR
