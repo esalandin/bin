@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, base64, httplib, json;
+import sys, base64, socket, httplib, json;
 
 if len(sys.argv) < 2 :
     print >> sys.stderr, "Usage: issueLookup ID [ID...]"
@@ -20,7 +20,11 @@ for issue_id in issue_list:
   jira_rest.putheader("Content-Type", "application/json")
   jira_rest.putheader("Authorization", "Basic " + auth)
   jira_rest.putheader("User-Agent", "issuelookup")
-  jira_rest.endheaders()
+  try:
+    jira_rest.endheaders()
+  except (httplib.HTTPException, socket.error) as ex:
+    print "Error: %s" % ex
+    exit(3)
   jira_rest.send("")
   jira_resp= jira_rest.getresponse()
   if jira_resp.status != 200:
@@ -31,4 +35,5 @@ for issue_id in issue_list:
   # print json.dumps(json_issue, indent=2);
   print '%s: %s' % (json_issue['key'], json_issue['fields']['summary'])
   print 'Status= %s' % json_issue['fields']['status']['name']
+jira_rest.close()
 exit(0)
