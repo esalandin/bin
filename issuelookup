@@ -1,14 +1,34 @@
 #!/usr/bin/env python
-import sys, base64, socket, httplib, json;
+import sys, getopt, base64, socket, httplib, json;
 
-if len(sys.argv) < 2 :
-    print >> sys.stderr, "Usage: issueLookup ID [ID...]"
+OPTS="hcsvaj"
+USAGE="Usage: issueLookup [-" + OPTS + "] ID [ID...]"
+
+try:
+  opts, args = getopt.getopt(sys.argv[1:], OPTS)
+except getopt.GetoptError as err:
+  print >> sys.stderr, err
+  print >> sys.stderr, USAGE
+  exit(1)
+
+if ("-h","") in opts:
+  print >> sys.stderr, USAGE
+  print >> sys.stderr, "-h: print help and exit"
+  print >> sys.stderr, "-c: key: summary (commit line - this is the default)"
+  print >> sys.stderr, "-s: status"
+  print >> sys.stderr, "-v: fix version"
+  print >> sys.stderr, "-a: assignee"
+  print >> sys.stderr, "-j: full json (long)"
+  exit(1)
+
+if len(args) == 0 :
+    print >> sys.stderr, USAGE
     exit(1)
 
 JIRA_URL="tekcomms-jira.global.tektronix.net:8085"
 JIRA_AUTH="jirareadonly:jirareadonly"
 
-issue_list= sys.argv[1:]
+issue_list= args
 
 auth = base64.encodestring(JIRA_AUTH).replace('\n', '')
 jira_rest= httplib.HTTPConnection(JIRA_URL)
@@ -28,12 +48,31 @@ for issue_id in issue_list:
   jira_rest.send("")
   jira_resp= jira_rest.getresponse()
   if jira_resp.status != 200:
-    print "Error:", jira_resp.status, jira_resp.reason
+    print "Error:", issue_id, jira_resp.status, jira_resp.reason
     exit(2)
   jira_resp_txt= jira_resp.read();
   json_issue= json.loads(jira_resp_txt, strict=False)
-  # print json.dumps(json_issue, indent=2);
-  print '%s: %s' % (json_issue['key'], json_issue['fields']['summary'])
-  print 'Status= %s' % json_issue['fields']['status']['name']
+
+  if (("-c", "") in opts) or (len(opts) == 0):
+    print '%s: %s' % (json_issue['key'], json_issue['fields']['summary'])
+  if ("-s", "") in opts:
+    print '%s Status= %s' % (json_issue['key'], json_issue['fields']['status']['name'])
+  if ("-v", "") in opts:
+    print "%s Fix Version=" % json_issue['key'] ,
+    fixversions_array= json_issue['fields']['fixVersions']
+    if len(fixversions_array) ==0:
+      print "[empty]",
+    for fixv in fixversions_array:
+      print fixv['name'] ,
+    print
+  if ("-a", "") in opts:
+    print '%s Assigned to=' % json_issue['key'],
+    assignee= json_issue['fields']['assignee']
+    if assignee is None:
+      print "[None]"
+    else:
+      print "%s (%s)" % (assignee['name'], assignee['displayName'])
+  if ("-j", "") in opts:
+    print json.dumps(json_issue, indent=2);
 jira_rest.close()
 exit(0)
