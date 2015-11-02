@@ -14,7 +14,7 @@ do
            echo "-r : remove" >&2
            echo "-l : list" >&2
            echo "-h : print usage and exit" >&2
-           echo "example: ia-docker.sh -p 1.0.0-beta.15" >&2
+           echo "example: ia-docker.sh -p V7.15.3.0.1b2" >&2
            exit 1;;
         p) COMMAND="pull";;
         r) COMMAND="remove";;
