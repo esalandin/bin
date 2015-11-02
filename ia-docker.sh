@@ -36,6 +36,7 @@ DREG=iris-analytics.tk
 
 IMAGES_LIST="";
 IMAGES_LIST+=" centos-base"
+IMAGES_LIST+=" centos7-base"
 IMAGES_LIST+=" anaconda"
 IMAGES_LIST+=" ansible"
 IMAGES_LIST+=" collection"
