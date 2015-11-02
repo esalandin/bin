@@ -16,3 +16,4 @@ pathadd() {
 }
 
 pathadd /sea/dev/bin
+pathadd /sea/local/bin
