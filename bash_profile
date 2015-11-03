@@ -3,7 +3,6 @@
 if [ -f $HOME/bashrc_debug ]; then
     set -x;
 fi
-PATH=${PATH}:$HOME/bin
 PS1="[\u@\h \W]\$ "
 
 export DBE_SERVER=dbe-dub2
@@ -14,6 +13,7 @@ pathadd() {
     fi
 }
 
+pathadd $HOME/bin
 pathadd /sea/dev/bin
 pathadd /sea/local/bin
 
