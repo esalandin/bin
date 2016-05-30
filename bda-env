@@ -1,5 +1,5 @@
 ##########
-# set env for ia builds
+# set env for bda builds
 # to be sourced
 ##########
 pathadd() {
@@ -26,8 +26,8 @@ echo "PATH=$PATH"
 ##########
 MVNOPTS=""
 MVNOPTS+="-Pcoverage "
-MVNOPTS+="-Dmaven.repo.local=/Users/emanuel/workspace/ia/repository "
-MVNOPTS+="--settings /Users/emanuel/workspace/ia/settings.xml "
+MVNOPTS+="-Dmaven.repo.local=/Users/emanuel/workspace/bda/repository "
+MVNOPTS+="--settings /Users/emanuel/workspace/bda/settings.xml "
 echo "MVNOPTS=$MVNOPTS"
 
 ##########
