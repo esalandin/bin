@@ -3,16 +3,20 @@
 # Examples:
 # frename JPG jpg DSC*.JPG
 #
-USAGE="Usage: frename [-h] | pattern repl file ..."
-
-while getopts h OPTCHAR
+USAGE="Usage: frename [-h] | [-ei] pattern repl file ..."
+CMD="mv";
+while getopts hei OPTCHAR
 do
 	case $OPTCHAR in
 	h) echo $USAGE >&2;
 	   echo "renames files replacing pattern in file name" >&2
 	   echo "Options:" >&2
 	   echo "-h  : print usage and exit" >&2
+	   echo "-e  : echo commands only (no change)" >&2
+	   echo "-i  : interactive" >&2
 	   exit 1;;
+        e) CMD="echo $CMD";;
+        i) CMD="$CMD -i";;
 	?) echo $USAGE >&2;
 	   exit 1;;
 	esac
@@ -30,8 +34,8 @@ FILES=$*;
 for FILE in $FILES; do
 	DIR=`dirname "$FILE"`;
 	FILENAME=`basename "$FILE"`;
-    NEWFILENAME=${FILENAME/$PATTERN/$REPL};
+        NEWFILENAME=${FILENAME/$PATTERN/$REPL};
 	if [ -f "$FILE" -a "$FILENAME" != "$NEWFILENAME" ]; then
-        echo $FILE "->" $DIR/$NEWFILENAME
+        $CMD $FILE $DIR/$NEWFILENAME
 	fi
 done
