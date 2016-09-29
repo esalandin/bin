@@ -11,6 +11,7 @@ pathadd() {
     fi
 }
 
-pathadd $HOME/bin
+pathadd "$HOME/bin"
+pathadd "$HOME/workspace/bin"
 
 unset -f pathadd
