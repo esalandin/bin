@@ -1,11 +1,12 @@
 #!/bin/sh
+# set -x
+#
 # This will rename one or more files
 # Examples:
 # frename JPG jpg DSC*.JPG
 #
-USAGE="Usage: frename [-h] | [-ei] pattern repl file ..."
-CMD="mv";
-while getopts hei OPTCHAR
+USAGE="Usage: frename [-h] | [-e] pattern repl file ..."
+while getopts he OPTCHAR
 do
 	case $OPTCHAR in
 	h) echo $USAGE >&2;
@@ -13,10 +14,8 @@ do
 	   echo "Options:" >&2
 	   echo "-h  : print usage and exit" >&2
 	   echo "-e  : echo commands only (no change)" >&2
-	   echo "-i  : interactive" >&2
 	   exit 1;;
-        e) CMD="echo $CMD";;
-        i) CMD="$CMD -i";;
+        e) ECHO=yes;;
 	?) echo $USAGE >&2;
 	   exit 1;;
 	esac
@@ -27,15 +26,23 @@ if test $# -lt 3; then
 	exit 1;
 fi
 
+P_IFS=$IFS;
+IFS=$'\n';
+
 PATTERN=$1; shift;
 REPL=$1; shift;
 FILES=$*;
 
 for FILE in $FILES; do
-	DIR=`dirname "$FILE"`;
-	FILENAME=`basename "$FILE"`;
-        NEWFILENAME=${FILENAME/$PATTERN/$REPL};
-	if [ -f "$FILE" -a "$FILENAME" != "$NEWFILENAME" ]; then
-        $CMD $FILE $DIR/$NEWFILENAME
-	fi
+    DIR=`dirname "$FILE"`;
+    FILENAME=`basename "$FILE"`;
+    NEWFILENAME=${FILENAME/$PATTERN/$REPL};
+    if [ -f "$FILE" -a "$FILENAME" != "$NEWFILENAME" ]; then
+        if [ "$ECHO" ]; then
+            echo mv $FILE $DIR/$NEWFILENAME;
+        else
+           mv $FILE $DIR/$NEWFILENAME;
+        fi
+    fi
 done
+IFS=$P_IFS;
