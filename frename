@@ -1,8 +1,7 @@
 #!/bin/sh
-# This will repeat # times a command
+# This will rename one or more files
 # Examples:
-# loop 2 date; will print a date twice
-# loop 80 echo "-\c"; will print a line of 80 "-"
+# frename JPG jpg DSC*.JPG
 #
 USAGE="Usage: frename [-h] | pattern repl file ..."
 
@@ -29,6 +28,10 @@ REPL=$1; shift;
 FILES=$*;
 
 for FILE in $FILES; do
-    NEWFILE=${FILE/$PATTERN/$REPL};
-    echo $FILE "->" $NEWFILE
+	DIR=`dirname "$FILE"`;
+	FILENAME=`basename "$FILE"`;
+    NEWFILENAME=${FILENAME/$PATTERN/$REPL};
+	if [ -f "$FILE" -a "$FILENAME" != "$NEWFILENAME" ]; then
+        echo $FILE "->" $DIR/$NEWFILENAME
+	fi
 done
