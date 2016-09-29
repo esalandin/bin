@@ -1,6 +1,6 @@
 #!/bin/false
 # to be sourced-in, or ln -s ~/bin/bash_profile ~/.bash_profile
-if [ -f $HOME/bashrc_debug ]; then
+if [ -f "$HOME/bashrc_debug" ]; then
     set -x;
 fi
 PS1="[\u@\h \W]\$ "
