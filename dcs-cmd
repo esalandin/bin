@@ -1,0 +1,39 @@
+#!/usr/bin/env expect -f
+#read the input parameters
+set host dcs-942l
+set user root
+set passwd 110684sa
+set basedir /mnt/usb/dcs-942l
+spawn telnet $host
+expect {
+    timeout { send_user "\nFailed to get login prompt\n"; exit 1 }
+    eof { send_user "\ntelnet failure\n"; exit 1 }
+    "login:"
+} 
+send "$user\r"
+expect {
+    timeout { send_user "\nFailed to get password prompt\n"; exit 1 }
+    eof { send_user "\ntelnet failure\n"; exit 1 }
+    "Password:"
+} 
+send "$passwd\r"
+expect {
+    timeout { send_user "\nFailed to get shell prompt\n"; exit 1 }
+    eof { send_user "\ntelnet failure\n"; exit 1 }
+    "\# "
+} 
+send "ls -1p $basedir\r"
+expect "\r\n"
+set filenames {}
+expect {
+    timeout { send_user "\nFailed to get shell prompt\n"; exit 1 }
+    eof { send_user "\ntelnet failure\n"; exit 1 }
+    -re "(\[a-zA-z0-9\.]+)\r\n" { set filename $expect_out(1,string); lappend filenames $filename; exp_continue }
+    "\# " {}
+} 
+foreach fn $filenames {
+    send_user "$fn\n" 
+}
+send "exit\r"
+expect eof
+exit 0
