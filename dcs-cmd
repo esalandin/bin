@@ -1,39 +1,62 @@
 #!/usr/bin/env expect -f
+
+proc telnet_connect {} {
+    global user passwd
+    expect {
+        timeout { send_user "\nFailed to get login prompt\n"; exit 1 }
+        eof { send_user "\ntelnet failure\n"; exit 1 }
+        "login:"
+    } 
+    send "$user\r"
+    expect {
+        timeout { send_user "\nFailed to get password prompt\n"; exit 1 }
+        eof { send_user "\ntelnet failure\n"; exit 1 }
+        "Password:"
+    } 
+    send "$passwd\r"
+    expect {
+        timeout { send_user "\nFailed to get shell prompt\n"; exit 1 }
+        eof { send_user "\ntelnet failure\n"; exit 1 }
+        "\# "
+    } 
+}
+
+proc get_dirs {path} {
+    global basedir
+    set filenames {}
+    set fp $basedir/$path
+    send "FP=$fp; test -d \$FP -o -f \$FP && ls -1p \$FP\r"
+    expect "\r\n"
+    expect {
+        timeout { send_user "\nFailed to get shell prompt\n"; exit 1 }
+        eof { send_user "\ntelnet failure\n"; exit 1 }
+        -re "(\[a-zA-z0-9\.]+)\r\n" { set filename $expect_out(1,string); lappend filenames $filename; exp_continue }
+        "\# " {}
+    } 
+    return $filenames
+}
+
+proc telnet_disconnect {} {
+    send "exit\r"
+    expect eof
+}
+
+#############################################
+# Starting here
+
 #read the input parameters
+
 set host dcs-942l
 set user root
 set passwd 110684sa
 set basedir /mnt/usb/dcs-942l
+set path [lindex $argv 0]
+
 spawn telnet $host
-expect {
-    timeout { send_user "\nFailed to get login prompt\n"; exit 1 }
-    eof { send_user "\ntelnet failure\n"; exit 1 }
-    "login:"
-} 
-send "$user\r"
-expect {
-    timeout { send_user "\nFailed to get password prompt\n"; exit 1 }
-    eof { send_user "\ntelnet failure\n"; exit 1 }
-    "Password:"
-} 
-send "$passwd\r"
-expect {
-    timeout { send_user "\nFailed to get shell prompt\n"; exit 1 }
-    eof { send_user "\ntelnet failure\n"; exit 1 }
-    "\# "
-} 
-send "ls -1p $basedir\r"
-expect "\r\n"
-set filenames {}
-expect {
-    timeout { send_user "\nFailed to get shell prompt\n"; exit 1 }
-    eof { send_user "\ntelnet failure\n"; exit 1 }
-    -re "(\[a-zA-z0-9\.]+)\r\n" { set filename $expect_out(1,string); lappend filenames $filename; exp_continue }
-    "\# " {}
-} 
+telnet_connect
+set filenames [get_dirs $path]
 foreach fn $filenames {
-    send_user "$fn\n" 
+    send_user " -> $fn\n" 
 }
-send "exit\r"
-expect eof
+telnet_disconnect
 exit 0
