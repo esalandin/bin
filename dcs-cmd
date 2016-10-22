@@ -4,7 +4,7 @@ proc telnet_connect {} {
     global user passwd
     expect {
         timeout { send_user "\nFailed to get login prompt\n"; exit 1 }
-        eof { send_user "\ntelnet failure\n"; exit 1 }
+        eof { send_user "$expect_out(buffer)telnet failure\n"; exit 1 }
         "login:"
     } 
     send "$user\r"
