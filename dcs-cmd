@@ -30,10 +30,28 @@ proc get_dirs {path} {
     expect {
         timeout { send_user "\nFailed to get shell prompt\n"; exit 1 }
         eof { send_user "\ntelnet failure\n"; exit 1 }
-        -re "(\[a-zA-z0-9\.]+)\r\n" { set filename $expect_out(1,string); lappend filenames $filename; exp_continue }
+        -re "(\[a-zA-z0-9\./]+)\r\n" { set filename $expect_out(1,string); lappend filenames $filename; exp_continue }
         "\# " {}
     } 
     return $filenames
+}
+
+proc is_dir_path {p} {
+    set lastchar [string index $p [expr [string length $p] - 1]]
+    return [string equal $lastchar "/"]
+}
+
+proc get_all_files {path} {
+    set files {}
+    set lslist [get_dirs $path]
+    foreach p $lslist {
+        if { [is_dir_path $p] } {
+            set files [concat $files [get_all_files $path/$p]]
+        } else {
+            lappend files $path/$p
+        }
+    }
+    return $files
 }
 
 proc telnet_disconnect {} {
@@ -52,11 +70,12 @@ set passwd 110684sa
 set basedir /mnt/usb/dcs-942l
 set path [lindex $argv 0]
 
+log_user 0
 spawn telnet $host
 telnet_connect
-set filenames [get_dirs $path]
+set filenames [get_all_files $path]
 foreach fn $filenames {
-    send_user " -> $fn\n" 
+    send_user "$fn\n" 
 }
 telnet_disconnect
 exit 0
