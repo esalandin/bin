@@ -120,6 +120,7 @@ proc tftp_get {src_path dest_path} {
     set tmptftpdest dcs-cmd-[pid].tftp
     close [open $tftpboot/$tmptftpdest "w"]
     file attributes $tftpboot/$tmptftpdest -permissions 00666
+    set time_start [clock seconds]
     send "tftp -l $basedir/$src_path -r pub/$tmptftpdest -p $tftp_server_ip 2>&1|grep -v ETA\r"
     expect "\r\n"
     set timeout 120
@@ -128,15 +129,17 @@ proc tftp_get {src_path dest_path} {
         eof { send_user "\ntelnet failure\n"; exit 1 }
         "\# " {}
     }
-    if { [file size $tftpboot/$tmptftpdest] == 0 } {
-        send_user "$src_path transfer failed\n"
+    set time_end [clock seconds]
+    set file_size [file size $tftpboot/$tmptftpdest]
+    if { $file_size == 0 } {
+        send_user "$src_path transfer failed after [expr $time_end - $time_start] seconds\n"
 	file delete $tftpboot/$tmptftpdest
     } else {
         file attributes $tftpboot/$tmptftpdest -permissions 00644
         set final_dir [file dirname $final_path]
         file mkdir $final_dir
         file rename $tftpboot/$tmptftpdest $final_path
-        send_user "$src_path copied\n"
+        send_user "$src_path copied ($file_size bytes in [expr $time_end - $time_start] seconds)\n"
     }
 }
 
