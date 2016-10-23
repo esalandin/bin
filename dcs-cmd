@@ -25,12 +25,16 @@ proc get_dirs {path} {
     global basedir
     set filenames {}
     set fp $basedir/$path
-    send "FP=$fp; test -d \$FP -o -f \$FP && ls -1p \$FP\r"
+    send "FP=$fp; test -d \$FP && ls -1p \$FP\r"
     expect "\r\n"
     expect {
         timeout { send_user "\nFailed to get shell prompt after ls command\n"; exit 1 }
         eof { send_user "\ntelnet failure\n"; exit 1 }
-        -re "(\[a-zA-z0-9\./]+)\r\n" { set filename $expect_out(1,string); lappend filenames $filename; exp_continue }
+        -re "(\[^\r]*)\r\n" {
+            set filename $expect_out(1,string);
+            lappend filenames $filename;
+            exp_continue;
+        }
         "\# " {}
     } 
     return $filenames
@@ -62,7 +66,7 @@ proc telnet_disconnect {} {
 proc usage {} {
     send_user "usage: dcs-cmd \[-v] cmd \[remote command]\n"
     send_user "       dcs-cmd \[-v] ls \[SD path]\n"
-    send_user "       dcs-cmd \[-v] get \[SD path] \[SD path min] \[SD path max] \[local path prefix]\n"
+    send_user "       dcs-cmd \[-v] get \[SD path] \[local path]\n"
 }
 
 proc run_cmd {cmd_list} {
@@ -80,6 +84,29 @@ proc run_cmd {cmd_list} {
     } 
     return $cmd_out
 }
+
+proc uu_tar {src_path dest_path} {
+    global basedir
+    set tmpuufile /tmp/dcs-cmd-[pid].uu
+    set tmptarfile /tmp/dcs-cmd-[pid].tar
+    set out [open $tmpuufile w]
+    send "(cd $basedir; tar cf - $src_path | uuencode $src_path/tar.uu)\r"
+    expect "\r\n"
+    expect {
+        -re "^end\r\n" {
+            puts $out "end"
+            close $out
+        }
+        -re "^(\[^\r]*)\r\n" {
+            puts $out $expect_out(1,string)
+            exp_continue
+        }
+    }
+    expect "\# "
+    exec sh -c "uudecode -o $tmptarfile $tmpuufile && cd $dest_path && tar xf $tmptarfile"
+    exec rm $tmpuufile $tmptarfile
+}
+
 #############################################
 # Starting here
 
@@ -149,6 +176,32 @@ if {$cmd == "ls"} {
         send_user -- "$line\n"
     }
     telnet_disconnect
+} elseif {$cmd == "get"} {
+    if {$arg_idx < $argc} {
+        set path [lindex $argv $arg_idx]
+        incr arg_idx 1
+    } else {
+        set path "."
+    }
+    if {$arg_idx < $argc} {
+        set local_path [lindex $argv $arg_idx]
+        incr arg_idx 1
+    } else {
+        set local_path "/Users/emanuele/hd2/DCS-942L"
+    }
+    spawn telnet $host
+    telnet_connect
+    uu_tar $path $local_path
+    telnet_disconnect
+} else {
+    send_user "invalid command $cmd\n"
+    usage
+    exit 1
+}
+exit 0
+    set filenames [get_all_files $path]
+    foreach filename $filenames {
+    }
 } else {
     send_user "invalid command $cmd\n"
     usage
