@@ -122,7 +122,7 @@ proc tftp_get {src_path dest_path} {
     file attributes $tftpboot/$tmptftpdest -permissions 00666
     send "tftp -l $basedir/$src_path -r pub/$tmptftpdest -p $tftp_server_ip 2>&1|grep -v ETA\r"
     expect "\r\n"
-    set timeout 60
+    set timeout 120
     expect {
         timeout { send_user "\nFailed to get shell prompt after tftp command\n"; exit 1 }
         eof { send_user "\ntelnet failure\n"; exit 1 }
