@@ -150,7 +150,7 @@ proc tftp_get {src_path dest_path} {
 
 set host dcs-942l
 set user root
-set passwd 110684sa
+set passwd dcs-942-adm-241016
 set basedir /mnt/usb/dcs-942l
 set cmd [lindex $argv 0]
 set src_root [lindex $argv 1]
