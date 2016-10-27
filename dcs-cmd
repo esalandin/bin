@@ -80,8 +80,8 @@ proc run_cmd {cmd_list} {
     expect {
         timeout { send_user "\nFailed to get shell prompt after ls command\n"; exit 1 }
         eof { send_user "\ntelnet failure\n"; exit 1 }
-        "\# " {}
         -re "(\[^\r]*)\r\n" { set line $expect_out(1,string); lappend cmd_out $line; exp_continue }
+        "\# " {}
     } 
     return $cmd_out
 }
