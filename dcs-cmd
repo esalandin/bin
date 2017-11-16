@@ -192,7 +192,7 @@ if {$cmd == "ls"} {
     } else {
         set path ""
     }
-    spawn telnet $host
+    spawn telnet --ipv4 $host
     telnet_connect
     set filenames [get_all_files $path]
     foreach fn $filenames {
@@ -205,7 +205,7 @@ if {$cmd == "ls"} {
     } else {
         set cmd_list [lrange $argv $arg_idx [expr $argc - 1]]
     }
-    spawn telnet $host
+    spawn telnet --ipv4 $host
     telnet_connect
     set output [run_cmd $cmd_list]
     foreach line $output {
@@ -225,7 +225,7 @@ if {$cmd == "ls"} {
     } else {
         set local_path "/Users/emanuele/hd2/DCS-942L"
     }
-    spawn telnet $host
+    spawn telnet --ipv4 $host
     telnet_connect
     uu_tar $path $local_path
     telnet_disconnect
@@ -242,7 +242,7 @@ if {$cmd == "ls"} {
     } else {
         set local_path "/Users/emanuele/hd2/DCS-942L"
     }
-    spawn telnet $host
+    spawn telnet --ipv4 $host
     telnet_connect
     set filenames [get_all_files $path]
     foreach fn $filenames {
