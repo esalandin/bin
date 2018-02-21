@@ -11,7 +11,7 @@ if [ $# = "0" ]; then
 	sed -e "s/$PATTERN/$REPL/g" 
 else
 	FILES=$*
-	for FILE in "$FILES"; do
+	for FILE in $FILES; do
 		TEMPFILE=/tmp/repl_$$;
 		cp $FILE $TEMPFILE
 		sed -e "s/$PATTERN/$REPL/g" $TEMPFILE > $FILE;
