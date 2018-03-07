@@ -1,0 +1,257 @@
+#!/usr/bin/env expect --
+
+proc telnet_connect {} {
+    global user passwd
+    expect {
+        timeout { send_user "\nFailed to get login prompt\n"; exit 1 }
+        eof { send_user "$expect_out(buffer)telnet failure\n"; exit 1 }
+        "login:"
+    } 
+    send "$user\r"
+    expect {
+        timeout { send_user "\nFailed to get password prompt\n"; exit 1 }
+        eof { send_user "\ntelnet failure\n"; exit 1 }
+        "Password:"
+    } 
+    send "$passwd\r"
+    expect {
+        timeout { send_user "\nFailed to get shell prompt\n"; exit 1 }
+        eof { send_user "\ntelnet failure\n"; exit 1 }
+        "\# "
+    } 
+}
+
+proc get_dirs {path} {
+    global basedir
+    set filenames {}
+    set fp $basedir/$path
+    send "FP=$fp; test -d \$FP && ls -1p \$FP\r"
+    expect "\r\n"
+    expect {
+        timeout { send_user "\nFailed to get shell prompt after ls command\n"; exit 1 }
+        eof { send_user "\ntelnet failure\n"; exit 1 }
+        -re "(\[^\r]*)\r\n" {
+            set filename $expect_out(1,string);
+            lappend filenames $filename;
+            exp_continue;
+        }
+        "\# " {}
+    } 
+    return $filenames
+}
+
+proc is_dir_path {p} {
+    set lastchar [string index $p [expr [string length $p] - 1]]
+    return [string equal $lastchar "/"]
+}
+
+proc get_all_files {path} {
+    set files {}
+    set lslist [get_dirs $path]
+    foreach p $lslist {
+        if { [is_dir_path $p] } {
+            set files [concat $files [get_all_files $path/$p]]
+        } else {
+            lappend files $path/$p
+        }
+    }
+    return $files
+}
+
+proc telnet_disconnect {} {
+    send "exit\r"
+    expect eof
+}
+
+proc usage {} {
+    send_user "usage: dcs-cmd \[-v] cmd \[remote command]\n"
+    send_user "       dcs-cmd \[-v] ls \[SD path]\n"
+    send_user "       dcs-cmd \[-v] uu-tar-get \[SD path] \[local path]\n"
+    send_user "       dcs-cmd \[-v] tftp-get \[SD path] \[local path]\n"
+}
+
+proc run_cmd {cmd_list} {
+    set cmd_out {}
+    foreach str $cmd_list {
+        send -- "$str "
+    }
+    send "\r"
+    expect "\r\n"
+    expect {
+        timeout { send_user "\nFailed to get shell prompt after ls command\n"; exit 1 }
+        eof { send_user "\ntelnet failure\n"; exit 1 }
+        -re "(\[^\r]*)\r\n" { set line $expect_out(1,string); lappend cmd_out $line; exp_continue }
+        "\# " {}
+    } 
+    return $cmd_out
+}
+
+proc uu_tar {src_path dest_path} {
+    global basedir
+    set tmpuufile /tmp/dcs-cmd-[pid].uu
+    set tmptarfile /tmp/dcs-cmd-[pid].tar
+    set out [open $tmpuufile w]
+    send "(cd $basedir; tar cf - $src_path | uuencode $src_path/tar.uu)\r"
+    expect "\r\n"
+    expect {
+        -re "^end\r\n" {
+            puts $out "end"
+            close $out
+        }
+        -re "^(\[^\r]*)\r\n" {
+            puts $out $expect_out(1,string)
+            exp_continue
+        }
+    }
+    expect "\# "
+    exec sh -c "uudecode -o $tmptarfile $tmpuufile && cd $dest_path && tar xf $tmptarfile"
+    exec rm $tmpuufile $tmptarfile
+}
+
+proc tftp_get {src_path dest_path} {
+    set tftp_server_ip 192.168.1.3
+    global basedir
+    set final_path $dest_path/$src_path
+    if { [file exists $final_path] } {
+        send_user "$src_path already exists, skip\n"
+        return
+    }
+    set tftpboot /private/tftpboot/pub
+    set tmptftpdest dcs-cmd-[pid].tftp
+    close [open $tftpboot/$tmptftpdest "w"]
+    file attributes $tftpboot/$tmptftpdest -permissions 00666
+    set time_start [clock seconds]
+    send "tftp -l $basedir/$src_path -r pub/$tmptftpdest -p -b 1024 $tftp_server_ip 2>&1|grep -v ETA\r"
+    expect "\r\n"
+    set timeout 180
+    expect {
+        timeout { send_user "\nFailed to get shell prompt after tftp command\n"; exit 1 }
+        eof { send_user "\ntelnet failure\n"; exit 1 }
+        "\# " {}
+    }
+    set time_end [clock seconds]
+    set file_size [file size $tftpboot/$tmptftpdest]
+    if { $file_size == 0 } {
+        send_user "$src_path transfer failed after [expr $time_end - $time_start] seconds\n"
+	file delete $tftpboot/$tmptftpdest
+    } else {
+        file attributes $tftpboot/$tmptftpdest -permissions 00644
+        set final_dir [file dirname $final_path]
+        file mkdir $final_dir
+        file rename $tftpboot/$tmptftpdest $final_path
+        send_user "$src_path copied ($file_size bytes in [expr $time_end - $time_start] seconds)\n"
+    }
+}
+
+#############################################
+# Starting here
+
+#read the input parameters
+
+set host dcs-942l
+set user root
+set passwd dcs-942-adm-241016
+set basedir /mnt/usb/dcs-942l
+set cmd [lindex $argv 0]
+set src_root [lindex $argv 1]
+set dest_root [lindex $argv 2]
+set flag_verbose 0
+
+set arg_idx 0
+while {$arg_idx < $argc} {
+    set this_arg [lindex $argv $arg_idx]
+    if {[string index $this_arg 0] == "-"} {
+        for {set arg_str_idx 1} {$arg_str_idx < [string length $this_arg]} {incr arg_str_idx} {
+            set opt_chr [string index $this_arg $arg_str_idx]
+            if {$opt_chr == "v"} {
+                set flag_verbose 1
+            } else {
+                send_user "unknown option $opt_chr\n"
+                usage
+                exit 1
+            }
+        }
+        incr arg_idx 1
+    } else {
+        break
+    }
+}
+if {$arg_idx == $argc} { usage; exit 1 }
+set cmd [lindex $argv $arg_idx]
+incr arg_idx 1
+
+if {$flag_verbose} {
+    exp_internal 1
+} else {
+    log_user 0
+}
+
+if {$cmd == "ls"} {
+    if {$arg_idx < $argc} {
+        set path [lindex $argv $arg_idx]
+    } else {
+        set path ""
+    }
+    spawn telnet --ipv4 $host
+    telnet_connect
+    set filenames [get_all_files $path]
+    foreach fn $filenames {
+        send_user "$fn\n" 
+    }
+    telnet_disconnect
+} elseif {$cmd == "cmd"} {
+    if {$arg_idx >= $argc} {
+        set cmd_list {uptime}
+    } else {
+        set cmd_list [lrange $argv $arg_idx [expr $argc - 1]]
+    }
+    spawn telnet --ipv4 $host
+    telnet_connect
+    set output [run_cmd $cmd_list]
+    foreach line $output {
+        send_user -- "$line\n"
+    }
+    telnet_disconnect
+} elseif {$cmd == "uu-tar-get"} {
+    if {$arg_idx < $argc} {
+        set path [lindex $argv $arg_idx]
+        incr arg_idx 1
+    } else {
+        set path "."
+    }
+    if {$arg_idx < $argc} {
+        set local_path [lindex $argv $arg_idx]
+        incr arg_idx 1
+    } else {
+        set local_path "/Users/emanuele/hd2/DCS-942L"
+    }
+    spawn telnet --ipv4 $host
+    telnet_connect
+    uu_tar $path $local_path
+    telnet_disconnect
+} elseif {$cmd == "tftp-get"} {
+    if {$arg_idx < $argc} {
+        set path [lindex $argv $arg_idx]
+        incr arg_idx 1
+    } else {
+        set path [clock format [clock seconds] -format "%Y%m%d"]
+    }
+    if {$arg_idx < $argc} {
+        set local_path [lindex $argv $arg_idx]
+        incr arg_idx 1
+    } else {
+        set local_path "/Users/emanuele/hd2/DCS-942L"
+    }
+    spawn telnet --ipv4 $host
+    telnet_connect
+    set filenames [get_all_files $path]
+    foreach fn $filenames {
+        tftp_get $fn $local_path
+    }
+    telnet_disconnect
+} else {
+    send_user "invalid command $cmd\n"
+    usage
+    exit 1
+}
+exit 0
