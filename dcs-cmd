@@ -253,7 +253,7 @@ if {$cmd == "ls"} {
         set path [lindex $argv $arg_idx]
         incr arg_idx 1
     } else {
-        set path [clock format [clock seconds] -format "%Y%m%d"]
+        set path [clock format [expr [clock seconds] - 24 * 60 * 60] -format "%Y%m%d"]
     }
     if {$arg_idx < $argc} {
         set local_path [lindex $argv $arg_idx]
