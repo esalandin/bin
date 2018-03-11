@@ -38,5 +38,6 @@ addpattern *.groovy
 addpattern *.js
 addpattern *.yml
 addpattern *.py
+addpattern *.cs
 
 find $DIR -follow -type f -a \( $FINDPATTERN \)  $* |grep -v /\\.git/ |sed 's/ /\\ /g'
