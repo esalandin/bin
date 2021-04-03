@@ -1,0 +1,17 @@
+#!/bin/false
+# to be sourced-in, or ln -s ~/bin/zsh_profile ~/.zshrc
+if [ -f "$HOME/zshrc_debug" ]; then
+    set -x;
+fi
+#PS1="[\u@\h \W]\$ "
+
+pathadd() {
+    if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+}
+
+pathadd "$HOME/bin"
+pathadd "$HOME/workspace/bin"
+
+unset -f pathadd
